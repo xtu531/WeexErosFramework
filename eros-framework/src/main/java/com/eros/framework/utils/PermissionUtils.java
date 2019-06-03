@@ -24,4 +24,14 @@ public class PermissionUtils {
         }
         return hasPermisson;
     }
+    public static boolean checkPermission(Context context, String permission, PermissionManager.PermissionListener listener) {
+        PermissionManager permissionManager = ManagerFactory.getManagerService(PermissionManager
+                .class);
+        boolean hasPermisson = permissionManager.hasPermissions(context, permission);
+        if (!hasPermisson) {
+            permissionManager.requestPermissions(context, listener, permission);
+//            ModalManager.BmToast.toast(context, "读取sd卡存储权限未授予，请到应用设置页面开启权限!", Toast.LENGTH_SHORT);
+        }
+        return hasPermisson;
+    }
 }

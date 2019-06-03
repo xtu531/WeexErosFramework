@@ -2,6 +2,7 @@ package com.eros.framework.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,9 +18,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSON;
+import com.eros.framework.BMWXEnvironment;
 import com.eros.framework.R;
 import com.eros.framework.activity.AbstractWeexActivity;
+import com.eros.framework.activity.GlobalModalActivity;
 import com.eros.framework.adapter.DefaultNavigationAdapter;
+import com.eros.framework.constant.Constant;
 import com.eros.framework.constant.WXEventCenter;
 import com.eros.framework.event.TabbarEvent;
 import com.eros.framework.fragment.MainWeexFragment;
@@ -120,17 +124,51 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
             LinearLayout.LayoutParams weight1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
             itemView.setLayoutParams(weight1);
             itemView.setTextColor(tabBar.getColor(), tabBar.getSelectedColor());
-            itemView.setIndex(i);
+            if(items.size() > 4){
+                if(i > 2){
+                    itemView.setIndex(i-1);
+                }else if(i != 2) {
+                    itemView.setIndex(i);
+                }else if(i == 2){
+                    //itemView.set
+                }
+            } else {
+                itemView.setIndex(i);
+            }
+
+
             itemView.setData(item);
             llTabBar.addView(itemView);
-            itemView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    viewpager.setCurrentItem(((TableItemView) v).getIndex(), false);
+            if ("click".equals(item.getAction())) {
+                //click事件
+                itemView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent().putExtra(Constant.GLOBAL_MODAL_URL,BMWXEnvironment.mPlatformConfig.getUrl().getPlusPage())
+                                .setClass(context,GlobalModalActivity.class);
+                        context.startActivity(intent);
+                    }
+                });
+            } else {
+                itemView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewpager.setCurrentItem(((TableItemView) v).getIndex(), false);
+                    }
+                });
+            }
+            if(items.size() > 4){
+                if(i > 2){
+                    // new fragment
+                    initFragment(item, i-1);
+                }else if(i != 2){
+                    // new fragment
+                    initFragment(item, i);
                 }
-            });
-            // new fragment
-            initFragment(item, i);
+            } else {
+                initFragment(item, i);
+            }
+
         }
     }
 

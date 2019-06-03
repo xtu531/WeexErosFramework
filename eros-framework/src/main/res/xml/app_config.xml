@@ -17,6 +17,7 @@
     <module name="bmAxios">com.eros.framework.extend.module.AxiosModule</module>
     <module name="bmGeolocation">com.eros.framework.extend.module.GeolocationModule</module>
     <module name="bmModal">com.eros.framework.extend.module.ModalModule</module>
+    <module name="bmGlobalModal">com.eros.framework.extend.module.GlobalModal</module>
     <module name="bmImage">com.eros.framework.extend.module.ImageModule</module>
     <!--<module name="bmPay">com.eros.framework.extend.module.PayModule</module>-->
     <module name="bmStorage">com.eros.framework.extend.module.StorageModule</module>
