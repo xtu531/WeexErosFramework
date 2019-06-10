@@ -2,8 +2,11 @@ package com.eros.framework.event;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
+import com.eros.framework.BMWXEnvironment;
+import com.eros.framework.R;
 import com.eros.framework.activity.MainActivity;
 import com.eros.framework.adapter.router.RouterTracker;
 import com.eros.framework.constant.Constant;
@@ -12,9 +15,11 @@ import com.eros.framework.manager.ManagerFactory;
 import com.eros.framework.manager.StorageManager;
 import com.eros.framework.manager.impl.ParseManager;
 import com.eros.framework.manager.impl.dispatcher.DispatchEventManager;
+import com.eros.framework.model.PlatformConfigBean;
 import com.eros.framework.model.TabbarBadgeModule;
 import com.eros.framework.model.TabbarWatchBean;
 import com.eros.framework.model.WeexEventBean;
+import com.eros.framework.view.TableView;
 import com.eros.wxbase.EventGate;
 import com.squareup.otto.Subscribe;
 import com.taobao.weex.bridge.JSCallback;
@@ -27,7 +32,7 @@ public class TabbarEvent extends EventGate {
 
     private JSCallback watchCallback;
     private int callBaclKey;
-
+    private TableView tableView;
     public void perform(Context context, WeexEventBean eventBean, String type) {
         if (WXEventCenter.EVENT_TABBAR_SHOWBADGE.equals(type)) {
             showBadge(eventBean);
@@ -43,6 +48,8 @@ public class TabbarEvent extends EventGate {
             clearTabbarInfo(eventBean);
         } else if (WXEventCenter.EVENT_TABBAR_CLEARWATCH.equals(type)) {
             clearWatch(eventBean);
+        } else if (WXEventCenter.EVENT_TABBAR_REFRESH.equals(type)){
+            refreshTabbar(eventBean);
         }
 
     }
@@ -79,8 +86,30 @@ public class TabbarEvent extends EventGate {
         Context context = weexEventBean.getContext();
         StorageManager storageManager = ManagerFactory.getManagerService(StorageManager.class);
         storageManager.setData(context, Constant.SP.SP_TABBAR_JSON, weexEventBean.getJsParams());
-    }
+//
 
+    }
+    private void refreshTabbar(WeexEventBean weexEventBean){
+        Context context = weexEventBean.getContext();
+        Activity activity = RouterTracker.peekActivity();
+        StorageManager storageManager = ManagerFactory.getManagerService(StorageManager.class);
+        int index = Integer.parseInt(JSON.parseObject(weexEventBean.getJsParams()).get("index").toString());
+        if (activity instanceof MainActivity) {
+//            String bar = storageManager.getData(((MainActivity) context), Constant.SP.SP_TABBAR_JSON);
+//            if (!TextUtils.isEmpty(bar)) {
+//                PlatformConfigBean.TabBar bean = ManagerFactory.getManagerService(ParseManager.class).parseObject
+//                        (bar, PlatformConfigBean.TabBar.class);
+//                BMWXEnvironment.mPlatformConfig.setTabBar(bean);
+//            }
+            PlatformConfigBean.TabBar bean = ManagerFactory.getManagerService(ParseManager.class).parseObject
+                        (storageManager.getData(((MainActivity) activity), Constant.SP.SP_TABBAR_JSON), PlatformConfigBean.TabBar.class);
+            tableView = (TableView) ((MainActivity) activity).findViewById(R.id.tabView);
+            tableView.changeItem(bean,index);
+            //tableView.clear();
+
+
+        }
+    }
     private void watchIndex(WeexEventBean weexEventBean) {
         Context context = weexEventBean.getContext();
         watchCallback = weexEventBean.getJscallback();

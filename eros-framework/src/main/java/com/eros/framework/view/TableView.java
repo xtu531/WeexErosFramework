@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -108,7 +110,9 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
         DefaultNavigationAdapter.setTabbarNavigation(activity, navigatorArray.get(0));
 
     }
-
+    public void clear(){
+        llTabBar.removeAllViews();
+    }
 
     /**
      * 初始化各个Item
@@ -124,7 +128,7 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
             LinearLayout.LayoutParams weight1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
             itemView.setLayoutParams(weight1);
             itemView.setTextColor(tabBar.getColor(), tabBar.getSelectedColor());
-            if(items.size() > 4){
+            if(items.size() > 4 && "click".equals(items.get(2).getAction())){
                 if(i > 2){
                     itemView.setIndex(i-1);
                 }else if(i != 2) {
@@ -144,7 +148,7 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
                 itemView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent().putExtra(Constant.GLOBAL_MODAL_URL,BMWXEnvironment.mPlatformConfig.getUrl().getPlusPage())
+                        Intent intent = new Intent().putExtra(Constant.GLOBAL_MODAL_URL,item.getPagePath())
                                 .setClass(context,GlobalModalActivity.class);
                         context.startActivity(intent);
                     }
@@ -157,7 +161,7 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
                     }
                 });
             }
-            if(items.size() > 4){
+            if(items.size() > 4 && "click".equals(items.get(2).getAction())){
                 if(i > 2){
                     // new fragment
                     initFragment(item, i-1);
@@ -171,7 +175,72 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
 
         }
     }
+    /**
+     * 修改某个Item
+     *
+     * @param tabBar
+     */
+    public void changeItem(PlatformConfigBean.TabBar tabBar,int i) {
+        List<PlatformConfigBean.TabItem> items = tabBar.getList();
+            PlatformConfigBean.TabItem item = items.get(i);
+            TableItemView itemView = (TableItemView) llTabBar.getChildAt(i);
+            LinearLayout.LayoutParams weight1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+            itemView.setLayoutParams(weight1);
+            itemView.setTextColor(tabBar.getColor(), tabBar.getSelectedColor());
+            itemView.setData(item);
+            if("click".equals(item.getAction())){
+                if(i == 2){
+                    //itemView.set
+                    TableItemView temp1 = (TableItemView) llTabBar.getChildAt(i+1);
+                    temp1.setIndex(i);
+                    TableItemView temp2 = (TableItemView) llTabBar.getChildAt(i+2);
+                    temp2.setIndex(i+1);
+                }
+            } else {
+                if(i == 2){
+                    items.set(2,item);
+                    itemView.setIndex(i);
+                    TableItemView temp1 = (TableItemView) llTabBar.getChildAt(i+1);
+                    temp1.setIndex(i+1);
+                    TableItemView temp2 = (TableItemView) llTabBar.getChildAt(i+2);
+                    temp2.setIndex(i+2);
+//
+                }
 
+            }
+
+            if ("click".equals(item.getAction())) {
+                //click事件
+                itemView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent().putExtra(Constant.GLOBAL_MODAL_URL,item.getPagePath())
+                                .setClass(context,GlobalModalActivity.class);
+                        context.startActivity(intent);
+                    }
+                });
+            } else {
+                itemView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewpager.setCurrentItem(((TableItemView) v).getIndex(), false);
+                    }
+                });
+            }
+            if("click".equals(item.getAction())){
+                if(i == 2){
+                    fragments.remove(i);
+                    viewpager.getAdapter().notifyDataSetChanged();
+//                    if(viewpager.getCurrentItem() > 2)viewpager.setCurrentItem(viewpager.getCurrentItem()-1);
+                    NavigatorModel model1 = navigatorArray.get(3);
+                    NavigatorModel model2 = navigatorArray.get(4);
+                    navigatorArray.append(2, model1);
+                    navigatorArray.append(3, model2);
+                }
+            } else {
+                changeFragment(item, i);
+            }
+    }
     public void setBadge(TabbarBadgeModule module) {
         TableItemView itemView = (TableItemView) llTabBar.getChildAt(module.getIndex());
         if (!TextUtils.isEmpty(module.getTextColor())) {
@@ -201,7 +270,24 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
     /**
      * 初始化 Fragment
      */
+    private void changeFragment(PlatformConfigBean.TabItem item, int index){
+        if(fragments.size() > 4)fragments.remove(index);
+        MainWeexFragment fragment =  new MainWeexFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(MainWeexFragment.PAGE_URL, item.getPagePath());
+        fragment.setArguments(bundle);
+        fragments.add(index,fragment);
+        viewpager.getAdapter().notifyDataSetChanged();
+        if(viewpager.getCurrentItem() > 2)viewpager.setCurrentItem(viewpager.getCurrentItem()+1);
+        NavigatorModel model = new NavigatorModel();
+        model.navigatorModel = getNavStr(item);
 
+        NavigatorModel model1 = navigatorArray.get(index);
+        NavigatorModel model2 = navigatorArray.get(index+1);
+        navigatorArray.append(index+2, model2);
+        navigatorArray.append(index+1, model1);
+        navigatorArray.append(index, model);
+    }
     private void initFragment(PlatformConfigBean.TabItem item, int index) {
         MainWeexFragment fragment = new MainWeexFragment();
         Bundle bundle = new Bundle();
@@ -321,7 +407,7 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
     /**
      * ViewPage Fragment 适配器
      */
-    private static class MyFragmentAdapter extends FragmentPagerAdapter {
+    private static class MyFragmentAdapter extends FragmentStatePagerAdapter {
         private List<MainWeexFragment> fragments;
 
         public MyFragmentAdapter(FragmentManager fm, List<MainWeexFragment> fragments) {
@@ -341,7 +427,7 @@ public class TableView extends RelativeLayout implements ViewPager.OnPageChangeL
 
         @Override
         public int getItemPosition(Object object) {
-            return super.getItemPosition(object);
+            return PagerAdapter.POSITION_NONE;
         }
     }
 

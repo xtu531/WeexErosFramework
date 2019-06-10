@@ -97,4 +97,13 @@ public class TabBarModule extends WXModule {
         weexEventBean.setContext(mWXSDKInstance.getContext());
         ManagerFactory.getManagerService(DispatchEventManager.class).getBus().post(weexEventBean);
     }
+
+    @JSMethod(uiThread = true)
+    public void refreshTab(String params) {
+        WeexEventBean weexEventBean = new WeexEventBean();
+        weexEventBean.setJsParams(params);
+        weexEventBean.setKey(WXEventCenter.EVENT_TABBAR_REFRESH);
+        weexEventBean.setContext(mWXSDKInstance.getContext());
+        ManagerFactory.getManagerService(DispatchEventManager.class).getBus().post(weexEventBean);
+    }
 }
