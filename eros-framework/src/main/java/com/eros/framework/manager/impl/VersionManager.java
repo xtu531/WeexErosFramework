@@ -47,7 +47,7 @@ public class VersionManager extends Manager {
                     FileManager.unZip(zip, FileManager.getBundleDir(context));
                     SharePreferenceUtil.setVersion(context, SharePreferenceUtil
                             .getDownLoadVersion(context));
-//                    SharePreferenceUtil.setDownLoadVersion(context, null);
+//                  SharePreferenceUtil.setDownLoadVersion(context, null);
                 }
             }
         }
@@ -108,10 +108,12 @@ public class VersionManager extends Manager {
             compareVersion = parseManager.parseObject(downloadVersion,
                     JsVersionInfoBean.class);
         }
-
-        return isCoverByAssetsZip(context, new JsVersionInfoBean
+        if(assetsVersionInfo != null){
+            return isCoverByAssetsZip(context, new JsVersionInfoBean
                 (assetsVersionInfo.getJsVersion(), assetsVersionInfo.getAndroid(),
-                        assetsVersionInfo.getTimestamp()), compareVersion);
+                    assetsVersionInfo.getTimestamp()), compareVersion);
+        }else return false;
+
     }
 
 
