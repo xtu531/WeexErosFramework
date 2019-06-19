@@ -45,10 +45,12 @@ public class DebugActivity extends AbstractWeexActivity {
         String activeState = SharePreferenceUtil.getInterceptorActive(this);
         if (Constant.INTERCEPTOR_ACTIVE.equals(activeState)) {
             ParseManager parseManager = ManagerFactory.getManagerService(ParseManager.class);
-            String jsVersion = parseManager.parseObject(SharePreferenceUtil.getVersion
-                    (this), JsVersionInfoBean.class).getJsVersion();
-            tv_jsverision.setText(jsVersion);
-
+            JsVersionInfoBean bean = parseManager.parseObject(SharePreferenceUtil.getVersion
+                    (this), JsVersionInfoBean.class);
+            if(bean != null){
+                String jsVersion = bean.getJsVersion();
+                tv_jsverision.setText(jsVersion);
+            }
         }
 
         cb_hotrefresh.setEnabled(!Constant.INTERCEPTOR_ACTIVE.equals(activeState));
